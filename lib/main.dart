@@ -1,9 +1,8 @@
 import 'dart:convert';
 import 'dart:math';
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Fixed: Required for Clipboard
+import 'package:flutter/services.dart'; // This natively includes typed_data (Uint8List) and Clipboard
 import 'package:provider/provider.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_math_fork/flutter_math.dart';
@@ -803,7 +802,7 @@ class _PointGridEditorState extends State<PointGridEditor> {
   double spacingX = 30.0;
   double spacingY = 30.0;
   
-  List<Offset> points = [];
+  List<Offset> points =[];
   List<GridLine> lines =[];
   List<GridLine> redoStack =[];
   
