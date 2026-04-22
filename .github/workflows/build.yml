@@ -2,15 +2,10 @@ name: Build Android APK
 
 on:
   push:
-    branches:
-      - main
-      - master
+    branches: [ main, master ]
   pull_request:
-    branches:
-      - main
-      - master
+    branches: [ main, master ]
 
-# Attempts to silence the Node.js deprecation warning
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
@@ -41,7 +36,6 @@ jobs:
       - name: 🔍 Analyze Code (Safety Check)
         run: flutter analyze
 
-      # [NEW STEP] Automatically generates the missing Android Gradle files!
       - name: 🏗️ Generate Native Android Files
         run: flutter create --platforms=android .
 
