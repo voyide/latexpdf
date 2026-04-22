@@ -1,5 +1,4 @@
 import 'dart:math';
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -15,7 +14,7 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(
     MultiProvider(
-      providers:[ChangeNotifierProvider(create: (_) => DocumentProvider())],
+      providers: [ChangeNotifierProvider(create: (_) => DocumentProvider())],
       child: const ProNotesApp(),
     ),
   );
@@ -175,7 +174,7 @@ class LineShape extends DiagramShape {
 
   @override
   String toTikZ(double scale) {
-    return '\\draw [thick] (${(start.dx / scale).toStringAsFixed(2)}, ${-(start.dy / scale).toStringAsFixed(2)}) -- (${(end.dx / scale).toStringAsFixed(2)}, ${-(end.dy / scale).toStringAsFixed(2)});';
+    return '\\draw [thick] (${(start.dx / scale).toStringAsFixed(2)}, ${(-(start.dy / scale)).toStringAsFixed(2)}) -- (${(end.dx / scale).toStringAsFixed(2)}, ${(-(end.dy / scale)).toStringAsFixed(2)});';
   }
 }
 
@@ -218,7 +217,7 @@ class ArrowShape extends DiagramShape {
 
   @override
   String toTikZ(double scale) {
-    return '\\draw [thick, ->] (${(start.dx / scale).toStringAsFixed(2)}, ${-(start.dy / scale).toStringAsFixed(2)}) -- (${(end.dx / scale).toStringAsFixed(2)}, ${-(end.dy / scale).toStringAsFixed(2)});';
+    return '\\draw [thick, ->] (${(start.dx / scale).toStringAsFixed(2)}, ${(-(start.dy / scale)).toStringAsFixed(2)}) -- (${(end.dx / scale).toStringAsFixed(2)}, ${(-(end.dy / scale)).toStringAsFixed(2)});';
   }
 }
 
@@ -237,7 +236,7 @@ class RectangleShape extends DiagramShape {
 
   @override
   String toTikZ(double scale) {
-    return '\\draw [thick] (${(start.dx / scale).toStringAsFixed(2)}, ${-(start.dy / scale).toStringAsFixed(2)}) rectangle (${(end.dx / scale).toStringAsFixed(2)}, ${-(end.dy / scale).toStringAsFixed(2)});';
+    return '\\draw [thick] (${(start.dx / scale).toStringAsFixed(2)}, ${(-(start.dy / scale)).toStringAsFixed(2)}) rectangle (${(end.dx / scale).toStringAsFixed(2)}, ${(-(end.dy / scale)).toStringAsFixed(2)});';
   }
 }
 
@@ -257,7 +256,7 @@ class CircleShape extends DiagramShape {
 
   @override
   String toTikZ(double scale) {
-    return '\\draw [thick] (${(start.dx / scale).toStringAsFixed(2)}, ${-(start.dy / scale).toStringAsFixed(2)}) circle (${(radius / scale).toStringAsFixed(2)});';
+    return '\\draw [thick] (${(start.dx / scale).toStringAsFixed(2)}, ${(-(start.dy / scale)).toStringAsFixed(2)}) circle (${(radius / scale).toStringAsFixed(2)});';
   }
 }
 
@@ -522,7 +521,7 @@ class _VisualBlockWidgetState extends State<VisualBlockWidget> {
           // Toolbar
           Container(
             padding: const EdgeInsets.all(8),
-            color: inkBlack.withOpacity(0.05),
+            color: inkBlack.withValues(alpha: 0.05),
             child: Wrap(
               spacing: 8,
               children:[
@@ -742,7 +741,7 @@ class ExportScreen extends StatelessWidget {
           ),
         ),
         body: TabBarView(
-          children:[
+          children: [
             Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children:[
@@ -759,7 +758,7 @@ class ExportScreen extends StatelessWidget {
                 ),
                 Expanded(
                   child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 16, bottom: 16),
+                    margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(border: Border.all(color: inkBlack, width: 3), color: Colors.white),
                     child: SingleChildScrollView(
