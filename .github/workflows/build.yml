@@ -1,7 +1,5 @@
 name: Build Android APK
 
-# This triggers the action automatically whenever you push to the main/master branch,
-# or when you create a pull request.
 on:
   push:
     branches:
@@ -12,48 +10,47 @@ on:
       - main
       - master
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+# Attempts to silence the Node.js deprecation warning
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build:
     name: Build & Export APK
-    # Ubuntu is the fastest and most standard runner for compiling Android/Flutter
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout the code from your repository
       - name: 📥 Checkout Repository
         uses: actions/checkout@v4
 
-      # 2. Setup Java Environment (Required by Android Gradle to compile the app)
       - name: ☕ Setup Java 17
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17' # Java 17 is standard for modern Flutter/Gradle versions
+          java-version: '17'
 
-      # 3. Setup the Flutter Environment
       - name: 🐦 Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          cache: true # Caches the Flutter SDK to speed up subsequent builds
+          cache: true
 
-      # 4. Install all the packages specified in pubspec.yaml
       - name: 📦 Install Dependencies
         run: flutter pub get
 
-      # 5. Run static analysis to catch syntax errors, missing variables, or potential crashes
       - name: 🔍 Analyze Code (Safety Check)
         run: flutter analyze
 
-      # 6. Build the actual Android APK in release mode
+      # [NEW STEP] Automatically generates the missing Android Gradle files!
+      - name: 🏗️ Generate Native Android Files
+        run: flutter create --platforms=android .
+
       - name: 🛠️ Build Release APK
         run: flutter build apk --release
 
-      # 7. Upload the finished APK so you can download it from the GitHub Actions tab
       - name: 🚀 Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: pronotes-latex-apk
           path: build/app/outputs/flutter-apk/app-release.apk
-          retention-days: 14 # The APK will stay on GitHub for 14 days for you to download
+          retention-days: 14
