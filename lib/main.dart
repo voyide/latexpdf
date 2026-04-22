@@ -15,7 +15,7 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(
     MultiProvider(
-      providers: [ChangeNotifierProvider(create: (_) => DocumentProvider())],
+      providers:[ChangeNotifierProvider(create: (_) => DocumentProvider())],
       child: const ProNotesApp(),
     ),
   );
@@ -24,48 +24,48 @@ void main() {
 // ==========================================
 // THEME: BRUTALIST LIGHT PURPLE PAPER
 // ==========================================
-final Color paperBg = const Color(0xFFE5DDF0);
-final Color inkBlack = const Color(0xFF1E1E1E);
-final Color brassAccent = const Color(0xFFB58840);
-final Color rustRed = const Color(0xFF9E3C27);
-final Color steamGreen = const Color(0xFF385E38);
+const Color paperBg = Color(0xFFE5DDF0);
+const Color inkBlack = Color(0xFF1E1E1E);
+const Color brassAccent = Color(0xFFB58840);
+const Color rustRed = Color(0xFF9E3C27);
+const Color steamGreen = Color(0xFF385E38);
 
 final ThemeData brutalistTheme = ThemeData(
   fontFamily: 'Courier',
   scaffoldBackgroundColor: paperBg,
-  colorScheme: ColorScheme.light(
+  colorScheme: const ColorScheme.light(
     primary: inkBlack, secondary: brassAccent, surface: paperBg,
     error: rustRed, onPrimary: paperBg, onSecondary: inkBlack, onSurface: inkBlack,
   ),
-  appBarTheme: AppBarTheme(
+  appBarTheme: const AppBarTheme(
     backgroundColor: paperBg, foregroundColor: inkBlack, elevation: 0, centerTitle: true,
     shape: Border(bottom: BorderSide(color: inkBlack, width: 3)),
   ),
-  cardTheme: CardThemeData(
-    color: paperBg, elevation: 0, margin: const EdgeInsets.only(bottom: 16),
+  cardTheme: const CardThemeData(
+    color: paperBg, elevation: 0, margin: EdgeInsets.only(bottom: 16),
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.zero, side: BorderSide(color: inkBlack, width: 2)),
   ),
   filledButtonTheme: FilledButtonThemeData(
     style: FilledButton.styleFrom(
       backgroundColor: inkBlack, foregroundColor: paperBg,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-      side: BorderSide(color: inkBlack, width: 2), padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+      side: const BorderSide(color: inkBlack, width: 2), padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
     ),
   ),
   outlinedButtonTheme: OutlinedButtonThemeData(
     style: OutlinedButton.styleFrom(
       foregroundColor: inkBlack,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-      side: BorderSide(color: inkBlack, width: 2), padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+      side: const BorderSide(color: inkBlack, width: 2), padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
     ),
   ),
-  inputDecorationTheme: InputDecorationTheme(
+  inputDecorationTheme: const InputDecorationTheme(
     filled: true, fillColor: paperBg,
-    border: const OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: Colors.black, width: 2)),
-    enabledBorder: const OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: Colors.black, width: 2)),
-    focusedBorder: const OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: Colors.black, width: 3)),
+    border: OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: Colors.black, width: 2)),
+    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: Colors.black, width: 2)),
+    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: Colors.black, width: 3)),
   ),
-  dividerTheme: DividerThemeData(color: inkBlack, thickness: 2),
+  dividerTheme: const DividerThemeData(color: inkBlack, thickness: 2),
 );
 
 class ProNotesApp extends StatelessWidget {
@@ -105,8 +105,9 @@ class InlineLatexSyntax extends md.InlineSyntax {
 class LatexElementBuilder extends MarkdownElementBuilder {
   final MathStyle mathStyle;
   LatexElementBuilder({required this.mathStyle});
+  
   @override
-  Widget visitElementAfter(md.Element element, TextStyle? preferredStyle) {
+  Widget? visitElementAfter(md.Element element, TextStyle? preferredStyle) {
     return Math.tex(
       element.textContent,
       mathStyle: mathStyle,
@@ -125,8 +126,8 @@ class BrutalistMarkdown extends StatelessWidget {
       data: data,
       selectable: true,
       styleSheet: MarkdownStyleSheet(
-        p: TextStyle(fontSize: 16, height: 1.5, fontFamily: 'Courier', color: inkBlack),
-        code: TextStyle(backgroundColor: Colors.black12, fontFamily: 'Courier', color: inkBlack),
+        p: const TextStyle(fontSize: 16, height: 1.5, fontFamily: 'Courier', color: inkBlack),
+        code: const TextStyle(backgroundColor: Colors.black12, fontFamily: 'Courier', color: inkBlack),
         codeblockDecoration: const BoxDecoration(color: Colors.black12, borderRadius: BorderRadius.zero),
       ),
       extensionSet: md.ExtensionSet(
@@ -340,7 +341,7 @@ class DocumentEditorScreen extends StatelessWidget {
         ],
       ),
       body: docProvider.blocks.isEmpty
-          ? Center(
+          ? const Center(
               child: Text(
                 'SYSTEM EMPTY.\nINITIALIZE BLOCK TO BEGIN.',
                 textAlign: TextAlign.center,
@@ -418,7 +419,7 @@ class _TextBlockWidgetState extends State<TextBlockWidget> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children:[
-                Text('MARKDOWN/LATEX', style: TextStyle(color: paperBg, fontWeight: FontWeight.bold)),
+                const Text('MARKDOWN/LATEX', style: TextStyle(color: paperBg, fontWeight: FontWeight.bold)),
                 Row(
                   children:[
                     IconButton(
@@ -429,7 +430,7 @@ class _TextBlockWidgetState extends State<TextBlockWidget> {
                     ),
                     const SizedBox(width: 16),
                     IconButton(
-                      icon: Icon(Icons.delete, color: rustRed, size: 20),
+                      icon: const Icon(Icons.delete, color: rustRed, size: 20),
                       onPressed: () => context.read<DocumentProvider>().removeBlock(widget.block.id),
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
@@ -508,9 +509,9 @@ class _VisualBlockWidgetState extends State<VisualBlockWidget> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children:[
-                Text('VISUAL_CANVAS (TIKZ)', style: TextStyle(color: inkBlack, fontWeight: FontWeight.bold)),
+                const Text('VISUAL_CANVAS (TIKZ)', style: TextStyle(color: inkBlack, fontWeight: FontWeight.bold)),
                 IconButton(
-                  icon: Icon(Icons.delete, color: rustRed, size: 20),
+                  icon: const Icon(Icons.delete, color: rustRed, size: 20),
                   onPressed: () => context.read<DocumentProvider>().removeBlock(widget.block.id),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
@@ -626,7 +627,6 @@ class BlockCanvasPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Draw grid background
     final Paint gridPaint = Paint()..color = Colors.black12..strokeWidth = 1;
     for (double i = 0; i < size.width; i += 20) canvas.drawLine(Offset(i, 0), Offset(i, size.height), gridPaint);
     for (double i = 0; i < size.height; i += 20) canvas.drawLine(Offset(0, i), Offset(size.width, i), gridPaint);
@@ -654,7 +654,7 @@ class ExportScreen extends StatelessWidget {
   const ExportScreen({super.key});
 
   String _generateLatexSource(List<DocBlock> blocks) {
-    final scale = 50.0; // 50 pixels = 1 cm
+    const double scale = 50.0; // 50 pixels = 1 cm
     StringBuffer sb = StringBuffer();
     sb.writeln(r'\documentclass{article}');
     sb.writeln(r'\usepackage{tikz}');
@@ -683,9 +683,6 @@ class ExportScreen extends StatelessWidget {
   Future<Uint8List> _generatePdf(List<DocBlock> blocks) async {
     final pdf = pw.Document();
 
-    // Since mapping complete Markdown + Math to raw PDF primitives is incredibly dense,
-    // for the "Quick PDF", we extract raw text, strip markdown symbols, and precisely map 
-    // the vector canvas drawings perfectly to native PDF canvas commands.
     pdf.addPage(pw.MultiPage(
       pageFormat: pw_pdf.PdfPageFormat.a4,
       build: (pw.Context context) {
@@ -693,7 +690,6 @@ class ExportScreen extends StatelessWidget {
         
         for (var block in blocks) {
           if (block is TextBlockData) {
-            // Simplified fallback for offline PDF
             widgets.add(pw.Padding(
               padding: const pw.EdgeInsets.symmetric(vertical: 10),
               child: pw.Text(
@@ -711,8 +707,8 @@ class ExportScreen extends StatelessWidget {
                 child: pw.CustomPaint(
                   size: pw_pdf.PdfPoint(400, block.canvasHeight),
                   painter: (pw_pdf.PdfGraphics canvas, pw_pdf.PdfPoint size) {
-                    canvas.setColor(pw_pdf.PdfColor.fromInt(0xFF000000));
-                    canvas.setLineWidth(2);
+                    canvas.setColor(pw_pdf.PdfColors.black);
+                    canvas.setLineWidth(2.0);
                     for (var shape in block.shapes) {
                       shape.drawPDF(context, canvas);
                     }
@@ -739,15 +735,14 @@ class ExportScreen extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('OUTPUT_COMPILER'),
-          bottom: TabBar(
+          bottom: const TabBar(
             indicator: BoxDecoration(color: inkBlack), labelColor: paperBg, unselectedLabelColor: inkBlack,
-            labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Courier'),
-            tabs: const[Tab(text: 'TRUE_TEX (OVERLEAF)'), Tab(text: 'QUICK_PDF (LOCAL)')],
+            labelStyle: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Courier'),
+            tabs:[Tab(text: 'TRUE_TEX (OVERLEAF)'), Tab(text: 'QUICK_PDF (LOCAL)')],
           ),
         ),
         body: TabBarView(
           children:[
-            // TAB 1: LATEX SOURCE
             Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children:[
@@ -777,7 +772,6 @@ class ExportScreen extends StatelessWidget {
                 )
               ],
             ),
-            // TAB 2: LOCAL PDF
             PdfPreview(
               build: (format) => _generatePdf(blocks),
               canChangeOrientation: false,
