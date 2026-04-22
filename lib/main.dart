@@ -3,6 +3,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Fixed: Required for Clipboard
 import 'package:provider/provider.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_math_fork/flutter_math.dart';
@@ -18,7 +19,7 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(
     MultiProvider(
-      providers: [ChangeNotifierProvider(create: (_) => DocumentProvider())],
+      providers:[ChangeNotifierProvider(create: (_) => DocumentProvider())],
       child: const ProNotesApp(),
     ),
   );
@@ -186,7 +187,7 @@ abstract class DiagramShape {
 
   Map<String, dynamic> _baseJson(String type) => {
     'type': type, 's_dx': start.dx, 's_dy': start.dy, 'e_dx': end.dx, 'e_dy': end.dy,
-    'color': color.value, 'width': strokeWidth, 'filled': isFilled
+    'color': color.toARGB32(), 'width': strokeWidth, 'filled': isFilled
   };
 }
 
@@ -197,7 +198,7 @@ class LineShape extends DiagramShape {
   @override
   void drawPDF(pw.Context context, pw_pdf.PdfGraphics canvas) { canvas.drawLine(start.dx, start.dy, end.dx, end.dy); canvas.strokePath(); }
   @override
-  String toTikZ(double scale) => '\\draw [color_${color.value}, line width=${strokeWidth}pt] (${(start.dx/scale).toStringAsFixed(2)}, ${(-(start.dy/scale)).toStringAsFixed(2)}) -- (${(end.dx/scale).toStringAsFixed(2)}, ${(-(end.dy/scale)).toStringAsFixed(2)});';
+  String toTikZ(double scale) => '\\draw [color_${color.toARGB32()}, line width=${strokeWidth}pt] (${(start.dx/scale).toStringAsFixed(2)}, ${(-(start.dy/scale)).toStringAsFixed(2)}) -- (${(end.dx/scale).toStringAsFixed(2)}, ${(-(end.dy/scale)).toStringAsFixed(2)});';
   @override
   Map<String, dynamic> toJson() => _baseJson('line');
 }
@@ -225,7 +226,7 @@ class ArrowShape extends DiagramShape {
     canvas.fillPath();
   }
   @override
-  String toTikZ(double scale) => '\\draw [color_${color.value}, ->, line width=${strokeWidth}pt] (${(start.dx/scale).toStringAsFixed(2)}, ${(-(start.dy/scale)).toStringAsFixed(2)}) -- (${(end.dx/scale).toStringAsFixed(2)}, ${(-(end.dy/scale)).toStringAsFixed(2)});';
+  String toTikZ(double scale) => '\\draw[color_${color.toARGB32()}, ->, line width=${strokeWidth}pt] (${(start.dx/scale).toStringAsFixed(2)}, ${(-(start.dy/scale)).toStringAsFixed(2)}) -- (${(end.dx/scale).toStringAsFixed(2)}, ${(-(end.dy/scale)).toStringAsFixed(2)});';
   @override
   Map<String, dynamic> toJson() => _baseJson('arrow');
 }
@@ -243,7 +244,7 @@ class RectangleShape extends DiagramShape {
   @override
   String toTikZ(double scale) {
     String cmd = isFilled ? '\\fill' : '\\draw';
-    return '$cmd[color_${color.value}, line width=${strokeWidth}pt] (${(start.dx/scale).toStringAsFixed(2)}, ${(-(start.dy/scale)).toStringAsFixed(2)}) rectangle (${(end.dx/scale).toStringAsFixed(2)}, ${(-(end.dy/scale)).toStringAsFixed(2)});';
+    return '$cmd[color_${color.toARGB32()}, line width=${strokeWidth}pt] (${(start.dx/scale).toStringAsFixed(2)}, ${(-(start.dy/scale)).toStringAsFixed(2)}) rectangle (${(end.dx/scale).toStringAsFixed(2)}, ${(-(end.dy/scale)).toStringAsFixed(2)});';
   }
   @override
   Map<String, dynamic> toJson() => _baseJson('rect');
@@ -262,7 +263,7 @@ class CircleShape extends DiagramShape {
   @override
   String toTikZ(double scale) {
     String cmd = isFilled ? '\\fill' : '\\draw';
-    return '$cmd [color_${color.value}, line width=${strokeWidth}pt] (${(start.dx/scale).toStringAsFixed(2)}, ${(-(start.dy/scale)).toStringAsFixed(2)}) circle (${(radius/scale).toStringAsFixed(2)});';
+    return '$cmd[color_${color.toARGB32()}, line width=${strokeWidth}pt] (${(start.dx/scale).toStringAsFixed(2)}, ${(-(start.dy/scale)).toStringAsFixed(2)}) circle (${(radius/scale).toStringAsFixed(2)});';
   }
   @override
   Map<String, dynamic> toJson() => _baseJson('circle');
@@ -465,7 +466,7 @@ class VisualBlockPreview extends StatelessWidget {
             height: 200, color: Colors.white,
             child: Stack(
               children:[
-                CustomPaint(size: Size(double.infinity, 200), painter: _PreviewPainter(block)),
+                CustomPaint(size: const Size(double.infinity, 200), painter: _PreviewPainter(block)),
                 Center(child: FilledButton.icon(icon: const Icon(Icons.edit), label: const Text('OPEN EDITOR'), onPressed: () {
                   Navigator.push(context, MaterialPageRoute(builder: (_) => AdvancedDrawingEditor(block: block)));
                 }))
@@ -484,7 +485,7 @@ class _PreviewPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     for (var layer in block.layers) {
       if (!layer.isVisible) continue;
-      canvas.saveLayer(Rect.fromLTWH(0, 0, size.width, size.height), Paint()..color = Colors.black.withOpacity(layer.opacity));
+      canvas.saveLayer(Rect.fromLTWH(0, 0, size.width, size.height), Paint()..color = Colors.black.withValues(alpha: layer.opacity));
       for (var shape in layer.shapes) {
         Paint p = Paint()..color = shape.color..strokeWidth = shape.strokeWidth..style = shape.isFilled ? PaintingStyle.fill : PaintingStyle.stroke;
         shape.drawUI(canvas, p);
@@ -594,14 +595,14 @@ class _AdvancedDrawingEditorState extends State<AdvancedDrawingEditor> {
           if (mirrorX) {
             Offset ms = Offset(cx + (cx - primary.start.dx), primary.start.dy);
             Offset me = Offset(cx + (cx - primary.end.dx), primary.end.dy);
-            DiagramShape? ms_shape = _createShape(ms, me);
-            if(ms_shape!=null) activeLayer.shapes.add(ms_shape);
+            DiagramShape? msShape = _createShape(ms, me);
+            if(msShape != null) activeLayer.shapes.add(msShape);
           }
           if (mirrorY) {
             Offset ms = Offset(primary.start.dx, cy + (cy - primary.start.dy));
             Offset me = Offset(primary.end.dx, cy + (cy - primary.end.dy));
-            DiagramShape? ms_shape = _createShape(ms, me);
-            if(ms_shape!=null) activeLayer.shapes.add(ms_shape);
+            DiagramShape? msShape = _createShape(ms, me);
+            if(msShape != null) activeLayer.shapes.add(msShape);
           }
           startPoint = null; currentPoint = null;
         });
@@ -663,7 +664,7 @@ class _AdvancedDrawingEditorState extends State<AdvancedDrawingEditor> {
         children:[
           // Left Sidebar Tools
           Container(
-            width: 70, color: inkBlack.withOpacity(0.05),
+            width: 70, color: inkBlack.withValues(alpha: 0.05),
             child: Column(
               children:[
                 IconButton(icon: const Icon(Icons.ads_click), color: currentTool==ToolType.select ? rustRed : inkBlack, onPressed: ()=>setState(()=>currentTool=ToolType.select)),
@@ -715,7 +716,7 @@ class _AdvancedDrawingEditorState extends State<AdvancedDrawingEditor> {
           ),
           // Right Sidebar Layers
           Container(
-            width: 150, color: brassAccent.withOpacity(0.2),
+            width: 150, color: brassAccent.withValues(alpha: 0.2),
             child: Column(
               children:[
                 const Padding(padding: EdgeInsets.all(8.0), child: Text("LAYERS", style: TextStyle(fontWeight: FontWeight.bold))),
@@ -761,7 +762,7 @@ class AdvancedCanvasPainter extends CustomPainter {
 
     for (var layer in block.layers) {
       if (!layer.isVisible) continue;
-      canvas.saveLayer(Rect.fromLTWH(0, 0, size.width, size.height), Paint()..color = Colors.black.withOpacity(layer.opacity));
+      canvas.saveLayer(Rect.fromLTWH(0, 0, size.width, size.height), Paint()..color = Colors.black.withValues(alpha: layer.opacity));
       for (var shape in layer.shapes) {
         Paint p = Paint()..color = shape.color..strokeWidth = shape.strokeWidth..style = shape.isFilled ? PaintingStyle.fill : PaintingStyle.stroke;
         shape.drawUI(canvas, p);
@@ -803,7 +804,7 @@ class _PointGridEditorState extends State<PointGridEditor> {
   double spacingY = 30.0;
   
   List<Offset> points = [];
-  List<GridLine> lines = [];
+  List<GridLine> lines =[];
   List<GridLine> redoStack =[];
   
   int? selectedPointIndex;
@@ -831,16 +832,18 @@ class _PointGridEditorState extends State<PointGridEditor> {
     }
     if (tappedIdx == null) return;
 
+    final int safeTappedIdx = tappedIdx;
+
     setState(() {
       if (selectedPointIndex == null) {
-        selectedPointIndex = tappedIdx;
-      } else if (selectedPointIndex == tappedIdx) {
-        lines.removeWhere((l) => l.p1 == tappedIdx || l.p2 == tappedIdx);
+        selectedPointIndex = safeTappedIdx;
+      } else if (selectedPointIndex == safeTappedIdx) {
+        lines.removeWhere((l) => l.p1 == safeTappedIdx || l.p2 == safeTappedIdx);
         selectedPointIndex = null;
       } else {
-        lines.add(GridLine(selectedPointIndex!, tappedIdx, currentLineColor));
+        lines.add(GridLine(selectedPointIndex!, safeTappedIdx, currentLineColor));
         redoStack.clear();
-        selectedPointIndex = tappedIdx;
+        selectedPointIndex = safeTappedIdx;
       }
     });
   }
@@ -858,11 +861,11 @@ class _PointGridEditorState extends State<PointGridEditor> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('POINT_GRID_TOOL'), actions: [FilledButton(onPressed: _saveToCanvas, child: const Text('SAVE_SHAPE'))]),
+      appBar: AppBar(title: const Text('POINT_GRID_TOOL'), actions:[FilledButton(onPressed: _saveToCanvas, child: const Text('SAVE_SHAPE'))]),
       body: Column(
         children:[
           Container(
-            padding: const EdgeInsets.all(8), color: brassAccent.withOpacity(0.2),
+            padding: const EdgeInsets.all(8), color: brassAccent.withValues(alpha: 0.2),
             child: Row(
               children:[
                 IconButton(icon: const Icon(Icons.undo), onPressed: lines.isEmpty ? null : () { setState(() { redoStack.add(lines.removeLast()); }); }),
@@ -920,17 +923,17 @@ class ExportScreen extends StatelessWidget {
     sb.writeln(r'\usepackage{amsmath}');
     
     // Extract unique colors to define at top
-    Set<int> colors = {};
+    Set<Color> colors = {};
     for(var b in blocks) {
       if (b is VisualBlockData) {
         for(var l in b.layers) {
-          for(var s in l.shapes) colors.add(s.color.value);
+          for(var s in l.shapes) colors.add(s.color);
         }
       }
     }
-    for(int cv in colors) {
-      Color c = Color(cv);
-      sb.writeln('\\definecolor{color_$cv}{RGB}{${c.red},${c.green},${c.blue}}');
+    for(Color c in colors) {
+      int cv = c.toARGB32();
+      sb.writeln('\\definecolor{color_$cv}{RGB}{${(c.r * 255).round().clamp(0, 255)},${(c.g * 255).round().clamp(0, 255)},${(c.b * 255).round().clamp(0, 255)}}');
     }
     sb.writeln(r'\begin{document}');
     sb.writeln();
@@ -977,9 +980,8 @@ class ExportScreen extends StatelessWidget {
                   painter: (pw_pdf.PdfGraphics canvas, pw_pdf.PdfPoint size) {
                     for (var layer in block.layers) {
                       if(!layer.isVisible) continue;
-                      // Opacity in standard flutter pdf is applied via colors, so we skip explicit scope here for brevity and apply vector paths
                       for (var shape in layer.shapes) {
-                        canvas.setColor(pw_pdf.PdfColor.fromInt(shape.color.value));
+                        canvas.setColor(pw_pdf.PdfColor.fromInt(shape.color.toARGB32()));
                         canvas.setLineWidth(shape.strokeWidth);
                         shape.drawPDF(context, canvas);
                       }
